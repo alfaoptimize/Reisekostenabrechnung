@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reisekostenabrechnung</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-slate-800 border-b border-slate-700 p-4 shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🚗</span>
+        <h1 class="text-xl font-bold text-white">Reisekostenabrechnung</h1>
+      </div>
+      <span class="text-xs bg-slate-700 text-slate-300 px-3 py-1 rounded-full border border-slate-600">
+        Inland (Deutschland)
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-1 p-6 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+    <!-- Formular & Eingaben (Links) -->
+    <section class="lg:col-span-7 space-y-6">
+
+      <!-- Stammdaten & Reisedauer -->
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow space-y-4">
+        <h2 class="text-md font-bold text-blue-400 border-b border-slate-700 pb-2">1. Reisedaten</h2>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-400">Reisebeginn</label>
+            <input type="datetime-local" id="startDateInput" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-blue-500 text-slate-100">
+          </div>
+          <div>
+            <label class="text-xs text-slate-400">Reiseende</label>
+            <input type="datetime-local" id="endDateInput" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-blue-500 text-slate-100">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-400">Anlass / Reisezweck</label>
+          <input type="text" id="purposeInput" placeholder="z. B. Kundentermin ACME Corp" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-blue-500 text-slate-100">
+        </div>
+      </div>
+
+      <!-- Tagesgenaue Mahlzeitengestellung -->
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow space-y-4">
+        <h2 class="text-md font-bold text-blue-400 border-b border-slate-700 pb-2">2. Gestellte Mahlzeiten pro Tag</h2>
+        <div id="daysContainer" class="space-y-3">
+          <!-- Dynamische Tageszeilen via JS -->
+        </div>
+      </div>
+
+      <!-- Fahrtkosten -->
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow space-y-4">
+        <h2 class="text-md font-bold text-blue-400 border-b border-slate-700 pb-2">3. Fahrtkosten (Kilometerpauschale)</h2>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-400">Gefahrene Kilometer (PKW)</label>
+            <input type="number" id="kmInput" min="0" placeholder="0" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-blue-500 text-slate-100">
+          </div>
+          <div>
+            <label class="text-xs text-slate-400">Satz pro km</label>
+            <input type="text" value="0,30 €" disabled class="w-full bg-slate-900/50 border border-slate-700 text-slate-400 rounded px-3 py-2 text-sm mt-1">
+          </div>
+        </div>
+      </div>
+
+      <!-- Einzelbelege -->
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+          <h2 class="text-md font-bold text-blue-400">4. Zusatzbelege (Hotel, ÖPNV, Parken)</h2>
+          <button id="addReceiptBtn" class="bg-slate-700 hover:bg-slate-600 text-xs px-2.5 py-1 rounded text-white transition">+ Beleg</button>
+        </div>
+
+        <div id="receiptsContainer" class="space-y-2">
+          <!-- Dynamische Belegzeilen -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Zusammenfassung & Export (Rechts) -->
+    <section class="lg:col-span-5 space-y-6">
+      
+      <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow sticky top-6 space-y-6">
+        <h2 class="text-lg font-bold text-white border-b border-slate-700 pb-2">Abrechnung</h2>
+
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between text-slate-300">
+            <span>Dauer:</span>
+            <span id="summaryDuration" class="font-medium text-white">0 Stunden</span>
+          </div>
+          <div class="flex justify-between text-slate-300">
+            <span>Verpflegungsmehraufwand:</span>
+            <span id="summaryPerDiem" class="font-medium text-white">0,00 €</span>
+          </div>
+          <div class="flex justify-between text-slate-300">
+            <span>Fahrtkosten:</span>
+            <span id="summaryKm" class="font-medium text-white">0,00 €</span>
+          </div>
+          <div class="flex justify-between text-slate-300">
+            <span>Zusatzbelege:</span>
+            <span id="summaryReceipts" class="font-medium text-white">0,00 €</span>
+          </div>
+
+          <div class="border-t border-slate-700 pt-3 flex justify-between items-center">
+            <span class="text-base font-bold text-white">Auszahlungsbetrag:</span>
+            <span id="summaryTotal" class="text-2xl font-bold text-emerald-400">0,00 €</span>
+          </div>
+        </div>
+
+        <button onclick="window.print()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition shadow text-sm flex items-center justify-center gap-2">
+          🖨️ Abrechnung drucken / PDF
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
